@@ -1,0 +1,37 @@
+#--------------------------------- input ---------------------------------------
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /usr/share/filebeat/input/logstash*.log
+  encoding: utf-8
+  fields:
+    type: spring
+  fields_under_root: true
+
+# -------------------------------- Kafka Output --------------------------------
+output.kafka:
+  enabled: true
+  hosts: ["kafka:9092"]
+  topic: beats
+
+# ------------------------------- Console Output -------------------------------
+#output.console:
+  # Boolean flag to enable or disable the output module.
+  #enabled: true
+
+  # Configure JSON encoding
+  #codec.json:
+    # Pretty-print JSON event
+    #pretty: false
+
+    # Configure escaping HTML symbols in strings.
+    #escape_html: false
+
+
+
+# ================================== Logging ===================================
+# Logging to rotating files. Set logging.to_files to false to disable logging to
+# files.
+logging.to_files: true
+logging.files:
