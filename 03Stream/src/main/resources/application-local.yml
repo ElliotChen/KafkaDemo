@@ -1,0 +1,20 @@
+spring:
+  kafka:
+    bootstrapServers: localhost:9092
+    streams:
+      applicationId: springstream
+      properties:
+        default:
+          key:
+            serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+          value:
+            serde: org.springframework.kafka.support.serializer.JsonSerde
+        spring:
+          json:
+            trusted:
+              packages: tw.elliot.stream.*
+    producer:
+      retries: 1
+    consumer:
+      groupId: spring
+      enableAutoCommit: true

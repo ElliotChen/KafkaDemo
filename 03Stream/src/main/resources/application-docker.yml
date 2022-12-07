@@ -1,0 +1,10 @@
+spring:
+  kafka:
+    bootstrapServers: kafka:9092
+    streams:
+      applicationId: springstream
+    producer:
+      retries: 1
+    consumer:
+      groupId: spring
+      enableAutoCommit: true
