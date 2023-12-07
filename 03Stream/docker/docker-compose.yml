@@ -11,16 +11,21 @@ services:
         "-c",
         "export CLUSTER_ID=$$(bin/kafka-storage.sh random-uuid) && 
         bin/kafka-storage.sh format -t $$CLUSTER_ID -c config/kraft/server.properties && 
-        bin/kafka-server-start.sh config/kraft/server.properties --override advertised.listeners=$${KAFKA_ADVERTISED_LISTENERS} --override listener.security.protocol.map=$${KAFKA_LISTENER_SECURITY_PROTOCOL_MAP} --override listeners=$${KAFKA_LISTENERS}
+        bin/kafka-server-start.sh config/kraft/server.properties --override advertised.listeners=$${KAFKA_ADVERTISED_LISTENERS} \
+        --override listener.security.protocol.map=$${KAFKA_LISTENER_SECURITY_PROTOCOL_MAP} --override listeners=$${KAFKA_LISTENERS} \
+        --override offsets.topic.num.partitions=$${KAFKA_OFFSETS_PARTITIONS} --override transaction.state.log.num.partitions=$${KAFKA_TRANSACTION_PARTITIONS}
         ",
       ]
     ports:
       - "9092:9092"
     environment:
+      TZ: ${TIME_ZONE}
       LOG_DIR: "/tmp/logs"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_LISTENERS: PLAINTEXT://:29092,PLAINTEXT_HOST://:9092,CONTROLLER://:9093
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://172.20.10.2:9092
+      KAFKA_OFFSETS_PARTITIONS: 1
+      KAFKA_TRANSACTION_PARTITIONS: 1
     volumes:
       - ./data/kafka/tmp/logs:/tmp/logs
     healthcheck:
@@ -42,9 +47,22 @@ services:
         "sh",
         "-c",
         "bin/kafka-topics.sh --create --bootstrap-server kafka:9092 --if-not-exists --partitions 1 --replication-factor 1 --topic streamsin &&
-        bin/kafka-topics.sh --create --bootstrap-server kafka:9092 --if-not-exists --partitions 1 --replication-factor 1 --topic streamsout 
+         bin/kafka-topics.sh --create --bootstrap-server kafka:9092 --if-not-exists --partitions 1 --replication-factor 1 --topic streamsout 
         ",
       ]
+    networks:
+      - streams
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: consdata/kouncil:latest
+    ports:
+      - "9080:8080"
+    environment:
+      bootstrapServers: "kafka:9092"
+    depends_on:
+      kafka:
+        condition: service_healthy
     networks:
       - streams
 
